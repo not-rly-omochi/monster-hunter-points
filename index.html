@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>泥棒王選手権 ポイント計算ツール</title>
+
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ================================
+   全体背景
+================================ */
+body {
+  background: #3a332d;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 70%),
+    linear-gradient(#443d37, #2a2623);
+  color: #fff;
+  font-family: sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+/* ================================
+   タイトル
+================================ */
+h1 {
+  font-family: 'M PLUS 1p', 'BIZ UDPGothic', sans-serif;
+  font-weight: 500;
+  font-size: 34px;
+  color: #f0dcae;
+  letter-spacing: 1px;
+  text-shadow:
+    -3px -3px 0 #0d0b0a,
+     3px -3px 0 #0d0b0a,
+    -3px  3px 0 #0d0b0a,
+     3px  3px 0 #0d0b0a,
+    -3px  0px 0 #0d0b0a,
+     3px  0px 0 #0d0b0a,
+     0px -3px 0 #0d0b0a,
+     0px  3px 0 #0d0b0a,
+    0 0 3px rgba(255,255,255,0.10);
+  margin-bottom: 18px;
+}
+
+select {
+  background: #3a332d;
+  color: #f0dcae;
+  border: 2px solid #5a4f45;
+  padding: 6px 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #f0dcae 50%),
+    linear-gradient(135deg, #f0dcae 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 4px), calc(100% - 12px) calc(50% - 4px);
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* ================================
+   説明文
+================================ */
+.note {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+/* ================================
+   段構成
+================================ */
+#rows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* ================================
+   スロット
+================================ */
+.slot {
+  width: 100px;
+  background: #2a2d33;
+  border: 2px solid #6a6a6a;
+  border-radius: 8px;
+  padding: 6px 4px;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(20, 15, 10, 0.55), inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 699px) {
+  .slot { width: 80px; }
+}
+
+.slot.empty {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
+}
+
+.slot.bonus {
+  border-color: #e6d27a;
+  box-shadow: 0 0 10px rgba(255, 240, 150, 0.55), inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ================================
+   アイコン
+================================ */
+.icon {
+  width: 64px;
+  height: 64px;
+  background: #3c3f46;
+  border-radius: 6px;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ================================
+   アイテム名
+================================ */
+.name {
+  white-space: nowrap;
+  font-size: clamp(10px, 2.6vw, 12px);
+  letter-spacing: -0.8px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* ================================
+   数量ボタン
+================================ */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn {
+  background: #4a4a4a;
+  border: 1px solid #888;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 #222;
+}
+
+.btn:hover { background: #5a5a5a; }
+.btn:active { background: #3a3a3a; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); }
+
+.count { width: 24px; text-align: center; font-size: 16px; }
+
+/* ================================
+   合計ポイント
+================================ */
+#total { font-size: 28px; margin-top: 30px; }
+
+/* ================================
+   リセットボタン
+================================ */
+#reset {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  background: #4a4a4a;
+  border: 1px solid #888;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 #222;
+}
+
+#reset:hover { background: #5a5a5a; }
+#reset:active { background: #3a3a3a; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); }
+</style>
+</head>
+
+<body>
+
+<h1>泥棒王選手権 ポイント計算ツール</h1>
+
+<label>狩猟対象モンスター：</label>
+<select id="monster">
+  <option>歴戦王レ・ダウ</option>
+  <option>歴戦王ウズ・トゥナ</option>
+  <option>歴戦王ヌ・エグドラ</option>
+  <option>歴戦王ジン・ダハド</option>
+  <option>歴戦王アルシュベルド</option>
+</select>
+
+<div class="note">
+  獲得したアイテムの数量を+/-で入力してください。<br>
+  <strong>ボーナスアイテム（ポイント2倍）：</strong>主催者が指定したアイテムをクリックして選択してください。
+</div>
+
+<div id="rows"></div>
+
+<div id="total">合計ポイント：0</div>
+<button id="reset">リセット</button>
+
+<script>
+/* ================================
+   データ定義
+================================ */
+const pcRows = [
+  [
+    { name: "クモの巣", point: 1, icon: "01_kumo_no_su.png" },
+    { name: "アオキノコ", point: 1, icon: "02_ao_kinoko.png" },
+    { name: "薬草", point: 1, icon: "03_yakusou.png" },
+    { name: "怪力の種", point: 1, icon: "04_kairiki_no_tane.png" },
+    { name: "鉄鉱石", point: 1, icon: "05_tekkouseki.png" },
+    { name: "なぞの骨", point: 1, icon: "06_nazo_no_hone.png" },
+    { name: "小タル", point: 1, icon: "07_shou_taru.png" },
+    { name: "大タル", point: 1, icon: "08_oo_taru.png" }
+  ],
+  [
+    { name: "秘密のポーチ", point: 2, icon: "11_himitsu_no_pouch.png" },
+    { name: "まんまるドングリ", point: 2, icon: "12_manmaru_donguri.png" },
+    { name: "小タル爆弾", point: 2, icon: "09_shou_taru_bakudan.png" },
+    { name: "大タル爆弾", point: 2, icon: "10_oo_taru_bakudan.png" },
+    { name: "肉球のスタンプ", point: 3, icon: "13_nikukyuu_no_stamp.png" },
+    { name: "尖鎧玉", point: 3, icon: "14_sen_yoroi_dama.png" },
+    { name: "堅鎧玉", point: 3, icon: "15_ken_yoroi_dama.png" },
+    { name: "重鎧玉", point: 3, icon: "16_juu_yoroi_dama.png" }
+  ],
+  [
+    { name: "ネコ毛の紅玉", point: 5, icon: "20_nekoge_no_kougyoku.png" },
+    { name: "銀の遺物チケット", point: 5, icon: "17_gin_no_ibutsu_ticket.png" },
+    { name: "銀のお守りチケット", point: 5, icon: "18_gin_no_omamori_ticket.png" },
+    { name: "銀の錬金チケット", point: 5, icon: "19_gin_no_renkin_ticket.png" },
+    null, null, null,
+    { name: "虫の死骸", point: -1, icon: "00_mushi_no_shigai.png" }
+  ]
+];
+
+const spRows = [
+  [{ name: "クモの巣", point: 1, icon: "01_kumo_no_su.png" }, { name: "アオキノコ", point: 1, icon: "02_ao_kinoko.png" }, { name: "薬草", point: 1, icon: "03_yakusou.png" }, { name: "怪力の種", point: 1, icon: "04_kairiki_no_tane.png" }],
+  [{ name: "鉄鉱石", point: 1, icon: "05_tekkouseki.png" }, { name: "なぞの骨", point: 1, icon: "06_nazo_no_hone.png" }, { name: "小タル", point: 1, icon: "07_shou_taru.png" }, { name: "大タル", point: 1, icon: "08_oo_taru.png" }],
+  [{ name: "秘密のポーチ", point: 2, icon: "11_himitsu_no_pouch.png" }, { name: "まんまるドングリ", point: 2, icon: "12_manmaru_donguri.png" }, { name: "小タル爆弾", point: 2, icon: "09_shou_taru_bakudan.png" }, { name: "大タル爆弾", point: 2, icon: "10_oo_taru_bakudan.png" }],
+  [{ name: "肉球のスタンプ", point: 3, icon: "13_nikukyuu_no_stamp.png" }, { name: "尖鎧玉", point: 3, icon: "14_sen_yoroi_dama.png" }, { name: "堅鎧玉", point: 3, icon: "15_ken_yoroi_dama.png" }, { name: "重鎧玉", point: 3, icon: "16_juu_yoroi_dama.png" }],
+  [{ name: "ネコ毛の紅玉", point: 5, icon: "20_nekoge_no_kougyoku.png" }, { name: "銀の遺物チケット", point: 5, icon: "17_gin_no_ibutsu_ticket.png" }, { name: "銀のお守りチケット", point: 5, icon: "18_gin_no_omamori_ticket.png" }, { name: "銀の錬金チケット", point: 5, icon: "19_gin_no_renkin_ticket.png" }],
+  [{ name: "虫の死骸", point: -1, icon: "00_mushi_no_shigai.png" }]
+];
+
+// ボーナス対象アイテムの定義
+const bonusEligibleNames = ["クモの巣", "アオキノコ", "薬草", "怪力の種", "鉄鉱石", "なぞの骨", "小タル", "大タル"];
+let bonusItem = null;
+
+function getRows() { return window.innerWidth >= 700 ? pcRows : spRows; }
+function getFlatItems() { return getRows().flat(); }
+
+/* ================================
+   描画
+================================ */
+function renderRows() {
+  const rowsContainer = document.getElementById("rows");
+  rowsContainer.innerHTML = "";
+  const rows = getRows();
+  let flatIndex = 0;
+
+  rows.forEach(rowItems => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+    rowItems.forEach(item => {
+      if (item === null) {
+        const emptySlot = document.createElement("div");
+        emptySlot.className = "slot empty";
+        rowDiv.appendChild(emptySlot);
+        flatIndex++;
+        return;
+      }
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      if (String(flatIndex) === bonusItem) slot.classList.add("bonus");
+      slot.dataset.index = flatIndex;
+      slot.innerHTML = `
+        <div class="icon"><img src="${item.icon}" alt="${item.name}"></div>
+        <div class="name">${item.name}</div>
+        <div class="controls">
+          <button class="btn minus">−</button>
+          <div class="count">0</div>
+          <button class="btn plus">＋</button>
+        </div>
+      `;
+      rowDiv.appendChild(slot);
+      flatIndex++;
+    });
+    rowsContainer.appendChild(rowDiv);
+  });
+  updateTotal();
+}
+
+/* ================================
+   イベントリスナー
+================================ */
+document.getElementById("rows").addEventListener("click", (e) => {
+  const slot = e.target.closest(".slot");
+  if (!slot || slot.classList.contains("empty")) return;
+
+  const index = slot.dataset.index;
+  const flatItems = getFlatItems();
+
+  // 数量変更
+  if (e.target.classList.contains("plus") || e.target.classList.contains("minus")) {
+    const countEl = slot.querySelector(".count");
+    let count = Number(countEl.textContent);
+    if (e.target.classList.contains("plus")) count++;
+    if (e.target.classList.contains("minus")) count = Math.max(0, count - 1);
+    countEl.textContent = count;
+  } 
+  // ボーナス選択（対象アイテムのみ）
+  else {
+    if (bonusEligibleNames.includes(flatItems[index].name)) {
+      if (bonusItem === index) {
+        bonusItem = null;
+        slot.classList.remove("bonus");
+      } else {
+        document.querySelectorAll(".slot").forEach(s => s.classList.remove("bonus"));
+        bonusItem = index;
+        slot.classList.add("bonus");
+      }
+    }
+  }
+  updateTotal();
+});
+
+function updateTotal() {
+  let total = 0;
+  const flatItems = getFlatItems();
+  document.querySelectorAll(".slot").forEach((slot, i) => {
+    if (slot.classList.contains("empty")) return;
+    const count = Number(slot.querySelector(".count").textContent);
+    let p = flatItems[i].point;
+    if (String(i) === bonusItem) p *= 2;
+    total += p * count;
+  });
+  document.getElementById("total").textContent = "合計ポイント：" + total;
+}
+
+window.addEventListener("resize", renderRows);
+document.getElementById("reset").addEventListener("click", () => {
+  bonusItem = null;
+  renderRows();
+});
+
+renderRows();
+</script>
+
+</body>
+</html>
